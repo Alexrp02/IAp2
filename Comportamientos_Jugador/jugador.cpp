@@ -171,7 +171,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 			SolutionFound = true;
 		}
 		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
-		else if (cerrados.find(current_node) == cerrados.end())
+		else if (cerrados.find(childForward) == cerrados.end())
 		{
 			childForward.secuencia.push_back(actFORWARD);
 			abiertos.push_back(childForward);
@@ -212,7 +212,6 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 
 	if (SolutionFound)
 		plan = current_node.secuencia;
-
 	return plan;
 }
 
