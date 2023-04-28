@@ -17,21 +17,37 @@ struct stateN0
   }
 };
 
-struct nodeN0{
+struct nodeN0
+{
   stateN0 st;
   list<Action> secuencia;
 
-  bool operator==(const nodeN0 &n) const{
+  bool operator==(const nodeN0 &n) const
+  {
     return (st == n.st);
   }
 
-  bool operator<(const nodeN0 &n) const{
-    if(st.jugador.f < n.st.jugador.f) return true;
-    else if (st.jugador.f == n.st.jugador.f and st.jugador.c < n.st.jugador.c) return true;
-    else if (st.jugador.f == n.st.jugador.f and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula) return true;
-    else return false ;
+  bool operator<(const nodeN0 &n) const
+  {
+    if (st.jugador.f < n.st.jugador.f)
+      return true;
+    else if (st.jugador.f == n.st.jugador.f and st.jugador.c < n.st.jugador.c)
+      return true;
+    else if (st.jugador.f == n.st.jugador.f and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
+      return true;
+    else
+    {
+      if (st.sonambulo.f < n.st.sonambulo.f)
+        return true;
+      else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c < n.st.sonambulo.c)
+        return true;
+      else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c and st.sonambulo.brujula < n.st.sonambulo.brujula)
+        return true;
+      else
+        return false;
+    }
   }
-} ;
+};
 
 class ComportamientoJugador : public Comportamiento
 {
@@ -60,8 +76,8 @@ private:
   // Declarar Variables de Estado
   bool hayPlan;
   list<Action> plan;
-  stateN0 c_state ;
+  stateN0 c_state;
   ubicacion goal;
-} ;
+};
 
 #endif
