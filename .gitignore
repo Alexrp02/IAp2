@@ -7,7 +7,6 @@ cmake_install.cmake
 .DS_Store
 build/
 Makefile
-.vscode
 .cmake
 compile_commands.json
 lib/
