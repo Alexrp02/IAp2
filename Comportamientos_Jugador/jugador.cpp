@@ -89,6 +89,7 @@ stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<un
 		{
 			st_result.sonambulo = sig_ubicacion;
 		}
+		break;
 	case actSON_TURN_SL:
 		st_result.sonambulo.brujula = static_cast<Orientacion>((st_result.sonambulo.brujula + 7) % 8);
 		break;
@@ -110,21 +111,21 @@ bool comprobarSolucion(ubicacion jugador, ubicacion final)
 // en visión.
 bool sonambuloEnVision(const stateN0 &st)
 {
-	int difFila = abs(st.jugador.f - st.sonambulo.f);
-	int difColumna = abs(st.jugador.c - st.sonambulo.c);
+	int difFila = st.jugador.f - st.sonambulo.f;
+	int difColumna = st.jugador.c - st.sonambulo.c;
 	switch (st.jugador.brujula)
 	{
 	case norte:
-		return ((difFila == 1 and difColumna <= 1) or (difFila == 2 and difColumna <= 2) or (difFila == 3 and difColumna <= 3));
+		return ((difFila == 1 and abs(difColumna) <= 1) or (difFila == 2 and abs(difColumna) <= 2) or (difFila == 3 and abs(difColumna) <= 3));
 		break;
 	case este:
-		return ((difColumna == 1 and difFila <= 1) or (difColumna == 2 and difFila <= 2) or (difColumna == 3 and difFila <= 3));
+		return ((difColumna == -1 and abs(difFila) <= 1) or (difColumna == -2 and abs(difFila) <= 2) or (difColumna == -3 and abs(difFila) <= 3));
 		break;
 	case oeste:
-		return ((difColumna == 1 and difFila <= 1) or (difColumna == 2 and difFila <= 2) or (difColumna == 3 and difFila <= 3));
+		return ((difColumna == 1 and abs(difFila) <= 1) or (difColumna == 2 and abs(difFila) <= 2) or (difColumna == 3 and abs(difFila) <= 3));
 		break;
 	case sur:
-		return ((difFila == 1 and difColumna <= 1) or (difFila == 2 and difColumna <= 2) or (difFila == 3 and difColumna <= 3));
+		return ((difFila == -1 and abs(difColumna) <= 1) or (difFila == -2 and abs(difColumna) <= 2) or (difFila == -3 and abs(difColumna) <= 3));
 		break;
 	}
 };
@@ -260,7 +261,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 	set<nodeN0> cerrados;
 	list<Action> plan;
 	current_node.st = inicio;
-	bool SolutionFound = (current_node.st.jugador.f == final.f and current_node.st.jugador.c == final.c);
+	bool SolutionFound = (current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c);
 	abiertos.push_back(current_node);
 
 	while (!abiertos.empty() and !SolutionFound)
@@ -269,34 +270,16 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 		abiertos.pop_front();
 		cerrados.insert(current_node);
 
-		// Estados generados para el jugador
-		// Generar hijo actFORWARD
-		nodeN0 childForward = current_node;
-		childForward.st = apply(actFORWARD, current_node.st, mapa);
-		// // Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
-		// if (childForward.st.sonambulo.c == final.c and childForward.st.sonambulo.f == final.f)
-		// {
-		// 	childForward.secuencia.push_back(actFORWARD);
-		// 	current_node = childForward;
-		// 	SolutionFound = true;
-		// }
-		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
-		if (cerrados.find(childForward) == cerrados.end())
-		{
-			childForward.secuencia.push_back(actFORWARD);
-			abiertos.push_back(childForward);
-		}
-
 		// Estados generados para el sonámbulo si está en visión.
 		if (sonambuloEnVision(current_node.st))
 		{
-			// Generar hijo actFORWARD
+			// Generar hijo actSON_FORWARD
 			nodeN0 childSonForward = current_node;
 			childSonForward.st = apply(actSON_FORWARD, current_node.st, mapa);
 			// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
 			if (childSonForward.st.sonambulo.c == final.c and childSonForward.st.sonambulo.f == final.f)
 			{
-				childSonForward.secuencia.push_back(actFORWARD);
+				childSonForward.secuencia.push_back(actSON_FORWARD);
 				current_node = childSonForward;
 				SolutionFound = true;
 			}
@@ -306,27 +289,41 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 				abiertos.push_back(childSonForward);
 			}
 
-			// Generar hijo actTURN_L
-			nodeN0 childSonTurnL = current_node;
-			childSonTurnL.st = apply(actSON_TURN_SL, current_node.st, mapa);
-			if (cerrados.find(childSonTurnL) == cerrados.end())
+			if (!SolutionFound)
 			{
-				childSonTurnL.secuencia.push_back(actSON_TURN_SL);
-				abiertos.push_back(childSonTurnL);
-			}
+				// Generar hijo actTURN_L
+				nodeN0 childSonTurnL = current_node;
+				childSonTurnL.st = apply(actSON_TURN_SL, current_node.st, mapa);
+				if (cerrados.find(childSonTurnL) == cerrados.end())
+				{
+					childSonTurnL.secuencia.push_back(actSON_TURN_SL);
+					abiertos.push_back(childSonTurnL);
+				}
 
-			// Generar hijo actTURN_R
-			nodeN0 childSonTurnR = current_node;
-			childSonTurnR.st = apply(actSON_TURN_SR, current_node.st, mapa);
-			if (cerrados.find(childSonTurnR) == cerrados.end())
-			{
-				childSonTurnR.secuencia.push_back(actSON_TURN_SR);
-				abiertos.push_back(childSonTurnR);
+				// Generar hijo actTURN_R
+				nodeN0 childSonTurnR = current_node;
+				childSonTurnR.st = apply(actSON_TURN_SR, current_node.st, mapa);
+				if (cerrados.find(childSonTurnR) == cerrados.end())
+				{
+					childSonTurnR.secuencia.push_back(actSON_TURN_SR);
+					abiertos.push_back(childSonTurnR);
+				}
 			}
 		}
 
 		if (!SolutionFound)
 		{
+			// Estados generados para el jugador
+			// Generar hijo actFORWARD
+			nodeN0 childForward = current_node;
+			childForward.st = apply(actFORWARD, current_node.st, mapa);
+
+			// Si el hijo generado no está en cerrados, entonces se añade a abiertos
+			if (cerrados.find(childForward) == cerrados.end())
+			{
+				childForward.secuencia.push_back(actFORWARD);
+				abiertos.push_back(childForward);
+			}
 			// Generar hijo actTURN_L
 			nodeN0 childTurnL = current_node;
 			childTurnL.st = apply(actTURN_L, current_node.st, mapa);
@@ -430,15 +427,17 @@ Action ComportamientoJugador::think(Sensores sensores)
 		goal.c = sensores.destinoC;
 
 		// Invocar al método de búsqueda dependiendo del nivel en el que estemos
-		switch(sensores.nivel){
-			case 0:
-				plan = AnchuraSoloJugador(c_state, goal, mapaResultado);
-				break;
-			case 1:
-				plan = AnchuraJugadorSonambulo(c_state, goal, mapaResultado);
-				break;
+		switch (sensores.nivel)
+		{
+		case 0:
+			plan = AnchuraSoloJugador(c_state, goal, mapaResultado);
+			break;
+		case 1:
+			plan = AnchuraJugadorSonambulo(c_state, goal, mapaResultado);
+			break;
 		}
-		if(plan.size() > 0){
+		if (plan.size() > 0)
+		{
 			VisualizaPlan(c_state, plan);
 			hayPlan = true;
 		}
@@ -446,13 +445,13 @@ Action ComportamientoJugador::think(Sensores sensores)
 
 	if (hayPlan and plan.size() > 0)
 	{
-		cout << "Ejecutando la siguiente acción del plan" << endl;
 		accion = plan.front();
 		plan.pop_front();
 	}
 	if (plan.size() == 0)
 	{
 		cout << "Se completó el plan" << endl;
+		cout << "Se ha tardado "<< sensores.tiempo << endl;
 		hayPlan = false;
 	}
 
