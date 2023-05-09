@@ -102,6 +102,151 @@ stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<un
 	return st_result;
 };
 
+estado apply(const Action &accion, const estado &state, const vector<vector<unsigned char>> &mapa, char terreno)
+{
+	estado st_result = state;
+	ubicacion sig_ubicacion;
+	int coste = 0;
+	switch (accion)
+	{
+	case actFORWARD:
+		sig_ubicacion = nextCasilla(state.nodo.st.jugador);
+		if (casillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion.f == state.nodo.st.sonambulo.f and sig_ubicacion.c == state.nodo.st.sonambulo.c))
+		{
+			st_result.nodo.st.jugador = sig_ubicacion;
+		}
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 10 : 100;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 15 : 50;
+			break;
+		case 'T':
+			coste = 2;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+	case actTURN_L:
+		st_result.nodo.st.jugador.brujula = static_cast<Orientacion>((st_result.nodo.st.jugador.brujula + 6) % 8);
+		
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 25 : 5;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 5 : 1;
+			break;
+		case 'T':
+			coste = 2;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+		break;
+	case actTURN_R:
+		st_result.nodo.st.jugador.brujula = static_cast<Orientacion>((st_result.nodo.st.jugador.brujula + 2) % 8);
+		
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 25 : 5;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 5 : 1;
+			break;
+		case 'T':
+			coste = 2;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+		break;
+	case actSON_FORWARD:
+		sig_ubicacion = nextCasilla(state.nodo.st.sonambulo);
+		if (casillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion.f == state.nodo.st.jugador.f and sig_ubicacion.c == state.nodo.st.jugador.c))
+		{
+			st_result.nodo.st.sonambulo = sig_ubicacion;
+		}
+		
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 10 : 100;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 15 : 50;
+			break;
+		case 'T':
+			coste = 2;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+		break;
+	case actSON_TURN_SL:
+		st_result.nodo.st.sonambulo.brujula = static_cast<Orientacion>((st_result.nodo.st.sonambulo.brujula + 7) % 8);
+		
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 7 : 2;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 3 : 1;
+			break;
+		case 'T':
+			coste = 1;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+		break;
+	case actSON_TURN_SR:
+		st_result.nodo.st.sonambulo.brujula = static_cast<Orientacion>((st_result.nodo.st.sonambulo.brujula + 1) % 8);
+		
+		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
+		switch (terreno)
+		{
+		case 'A':
+			state.hasBikini ? coste = 7 : 2;
+			break;
+		case 'B':
+			state.hasZapatillas ? coste = 3 : 1;
+			break;
+		case 'T':
+			coste = 1;
+			break;
+		default:
+			coste = 1;
+			break;
+		}
+		st_result.g = st_result.g + coste;
+		break;
+	default:
+		break;
+	}
+	return st_result;
+};
+
 bool comprobarSolucion(ubicacion jugador, ubicacion final)
 {
 	return (jugador.f == final.f and jugador.c == final.c);
@@ -129,58 +274,6 @@ bool sonambuloEnVision(const stateN0 &st)
 		break;
 	}
 };
-
-// bool AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
-// {
-//   stateN0 current_state = inicio;
-//   list<stateN0> abiertos;
-//   list<stateN0> cerrados;
-//   abiertos.push_back(current_state);
-//   bool solutionFound = (current_state.jugador.f == final.f and current_state.jugador.c == final.c);
-
-//   while (!abiertos.empty() and !solutionFound)
-//   {
-//     abiertos.pop_front();
-//     cerrados.push_back(current_state);
-
-//     // Generar hijo actFORWARD
-//     stateN0 childForward = apply(actFORWARD, current_state, mapa);
-
-//     // Si la casilla generada es el objetivo, se ha encontrado la solución
-//     if (comprobarSolucion(childForward.jugador, final))
-//     {
-//       current_state = childForward;
-//       solutionFound = true;
-//     }
-//     // Si no, si este no está ni en abiertos ni en cerrados, lo agregamos a abiertos
-//     else if (!Find(childForward, abiertos) and !Find(childForward, cerrados))
-//     {
-//       abiertos.push_back(childForward);
-//     }
-
-//     // Si la solución fue el hijo de actFORWARD, no generamos más hijos, pues tenemos la solución
-//     if (!solutionFound)
-//     {
-//       // Generar hijo actTURN_L
-//       stateN0 childTurnL = apply(actTURN_L, current_state, mapa);
-//       if (!Find(childTurnL, abiertos) and !Find(childTurnL, cerrados))
-//       {
-//         abiertos.push_back(childTurnL);
-//       }
-
-//       // Generar hijo actTURN_R
-//       stateN0 childTurnR = apply(actTURN_R, current_state, mapa);
-//       if (!Find(childTurnR, abiertos) and !Find(childTurnR, cerrados))
-//       {
-//         abiertos.push_back(childTurnR);
-//       }
-//     }
-
-//     if (!solutionFound and !abiertos.empty())
-//       current_state = abiertos.front();
-//   }
-//   return solutionFound;
-// } ;
 
 list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
@@ -360,6 +453,124 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 	return plan;
 }
 
+list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa, char terreno)
+{
+	estado current_node;
+	priority_queue<estado> abiertos;
+	set<estado> cerrados;
+	list<Action> plan;
+	current_node.nodo.st = inicio;
+	bool SolutionFound = (current_node.nodo.st.jugador.f == final.f and current_node.nodo.st.jugador.c == final.c);
+	abiertos.push(current_node);
+
+	while (!abiertos.empty() and !SolutionFound)
+	{
+		// Quitamos el nodo que está siendo evaluado de abiertos y lo metemos en cerrados
+		abiertos.pop();
+		cerrados.insert(current_node);
+
+		// // Estados generados para el sonámbulo si está en visión.
+		// if (sonambuloEnVision(current_node.nodo.st))
+		// {
+		// 	// Generar hijo actSON_FORWARD
+		// 	estado childSonForward = current_node;
+		// 	childSonForward = apply(actSON_FORWARD, current_node, mapa, terreno);
+		// 	// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
+		// 	if (childSonForward.nodo.st.sonambulo.c == final.c and childSonForward.nodo.st.sonambulo.f == final.f)
+		// 	{
+		// 		childSonForward.nodo.secuencia.push_back(actSON_FORWARD);
+		// 		current_node = childSonForward;
+		// 		SolutionFound = true;
+		// 	}
+		// 	else if (cerrados.find(childSonForward) == cerrados.end())
+		// 	{
+		// 		childSonForward.nodo.secuencia.push_back(actSON_FORWARD);
+		// 		abiertos.push(childSonForward);
+		// 	}
+
+		// 	if (!SolutionFound)
+		// 	{
+		// 		// Generar hijo actTURN_L
+		// 		estado childSonTurnL = current_node;
+		// 		childSonTurnL = apply(actSON_TURN_SL, current_node, mapa, terreno);
+		// 		if (cerrados.find(childSonTurnL) == cerrados.end())
+		// 		{
+		// 			childSonTurnL.nodo.secuencia.push_back(actSON_TURN_SL);
+		// 			abiertos.push(childSonTurnL);
+		// 		}
+
+		// 		// Generar hijo actTURN_R
+		// 		estado childSonTurnR = current_node;
+		// 		childSonTurnR = apply(actSON_TURN_SR, current_node, mapa, terreno);
+		// 		if (cerrados.find(childSonTurnR) == cerrados.end())
+		// 		{
+		// 			childSonTurnR.nodo.secuencia.push_back(actSON_TURN_SR);
+		// 			abiertos.push(childSonTurnR);
+		// 		}
+		// 	}
+		// }
+
+		// Estados generados para el jugador
+		// Generar hijo actFORWARD
+		estado childForward = current_node;
+		childForward = apply(actFORWARD, current_node, mapa, terreno);
+		// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
+		if (childForward.nodo.st.jugador.c == final.c and childForward.nodo.st.jugador.f == final.f)
+		{
+			childForward.nodo.secuencia.push_back(actSON_FORWARD);
+			current_node = childForward;
+			SolutionFound = true;
+		}else
+		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
+		if (cerrados.find(childForward) == cerrados.end())
+		{
+			childForward.nodo.secuencia.push_back(actFORWARD);
+			abiertos.push(childForward);
+		}
+
+		if (!SolutionFound)
+		{
+			// Generar hijo actTURN_L
+			estado childTurnL = current_node;
+			childTurnL = apply(actTURN_L, current_node, mapa, terreno);
+			if (cerrados.find(childTurnL) == cerrados.end())
+			{
+				childTurnL.nodo.secuencia.push_back(actTURN_L);
+				abiertos.push(childTurnL);
+			}
+
+			// Generar hijo actTURN_R
+			estado childTurnR = current_node;
+			childTurnR = apply(actTURN_R, current_node, mapa, terreno);
+			if (cerrados.find(childTurnR) == cerrados.end())
+			{
+				childTurnR.nodo.secuencia.push_back(actTURN_R);
+				abiertos.push(childTurnR);
+			}
+		}
+
+		// if (!SolutionFound and !abiertos.empty())
+		// {
+		// 	current_node = abiertos.top();
+		// 	while (!abiertos.empty() and cerrados.find(current_node) != cerrados.end())
+		// 	{
+		// 		abiertos.pop();
+		// 		if (!abiertos.empty())
+		// 			current_node = abiertos.top();
+		// 	}
+		// }
+		current_node = abiertos.top();
+	}
+
+	if (SolutionFound)
+	{
+		cout << "Coste de el camino: " << current_node.g << endl;
+		plan = current_node.nodo.secuencia;
+	}
+
+	return plan;
+}
+
 // Función que pone a 0 todos los elementos de una matriz
 void AnularMatriz(vector<vector<unsigned char>> &matriz)
 {
@@ -435,6 +646,8 @@ Action ComportamientoJugador::think(Sensores sensores)
 		case 1:
 			plan = AnchuraJugadorSonambulo(c_state, goal, mapaResultado);
 			break;
+		case 2:
+			plan = costeUniforme(c_state, goal, mapaResultado, sensores.terreno[0]);
 		}
 		if (plan.size() > 0)
 		{
@@ -451,7 +664,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 	if (plan.size() == 0)
 	{
 		cout << "Se completó el plan" << endl;
-		cout << "Se ha tardado "<< sensores.tiempo << endl;
+		cout << "Se ha tardado " << sensores.tiempo << endl;
 		hayPlan = false;
 	}
 

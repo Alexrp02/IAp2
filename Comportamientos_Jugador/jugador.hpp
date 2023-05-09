@@ -4,6 +4,7 @@
 #include "comportamientos/comportamiento.hpp"
 
 #include <list>
+#include <queue>
 
 // Estructura para representar estados para el nivel 0
 struct stateN0
@@ -15,6 +16,7 @@ struct stateN0
   {
     return (jugador == x.jugador && sonambulo == x.sonambulo);
   }
+
 };
 
 struct nodeN0
@@ -46,6 +48,25 @@ struct nodeN0
       else
         return false;
     }
+  }
+};
+
+struct estado
+{
+  nodeN0 nodo;
+  int g=0;
+  int h=0;
+  bool hasBikini;
+  bool hasZapatillas;
+
+  bool operator==(const estado &n) const
+  {
+    return (nodo == n.nodo);
+  }
+
+  bool operator<(const estado &n) const
+  {
+    return (g + h) > (n.g + n.h);
   }
 };
 
