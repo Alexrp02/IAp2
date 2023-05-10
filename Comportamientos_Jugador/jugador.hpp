@@ -5,7 +5,6 @@
 
 #include <list>
 #include <queue>
-
 // Estructura para representar estados para el nivel 0
 struct stateN0
 {
@@ -16,7 +15,6 @@ struct stateN0
   {
     return (jugador == x.jugador && sonambulo == x.sonambulo);
   }
-
 };
 
 struct nodeN0
@@ -31,31 +29,32 @@ struct nodeN0
 
   bool operator<(const nodeN0 &n) const
   {
-    if (st.jugador.f < n.st.jugador.f)
-      return true;
-    else if (st.jugador.f == n.st.jugador.f and st.jugador.c < n.st.jugador.c)
-      return true;
-    else if (st.jugador.f == n.st.jugador.f and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
-      return true;
-    else
-    {
-      if (st.sonambulo.f < n.st.sonambulo.f)
-        return true;
-      else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c < n.st.sonambulo.c)
-        return true;
-      else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c and st.sonambulo.brujula < n.st.sonambulo.brujula)
-        return true;
-      else
-        return false;
-    }
+    // Comparar el estado del jugador
+    if (st.jugador.f != n.st.jugador.f)
+      return st.jugador.f < n.st.jugador.f;
+    if (st.jugador.c != n.st.jugador.c)
+      return st.jugador.c < n.st.jugador.c;
+    if (st.jugador.brujula != n.st.jugador.brujula)
+      return st.jugador.brujula < n.st.jugador.brujula;
+
+    // Comparar el estado del sonámbulo
+    if (st.sonambulo.f != n.st.sonambulo.f)
+      return st.sonambulo.f < n.st.sonambulo.f;
+    if (st.sonambulo.c != n.st.sonambulo.c)
+      return st.sonambulo.c < n.st.sonambulo.c;
+    if (st.sonambulo.brujula != n.st.sonambulo.brujula)
+      return st.sonambulo.brujula < n.st.sonambulo.brujula;
+
+    // Si todos los campos son iguales, no hay diferencia de orden
+    return false;
   }
 };
 
 struct estado
 {
   nodeN0 nodo;
-  int g=0;
-  int h=0;
+  int g = 0;
+  int h = 0;
   bool hasBikini;
   bool hasZapatillas;
 
