@@ -57,6 +57,8 @@ struct estado
   int h = 0;
   bool hasBikini = false;
   bool hasZapatillas = false;
+  char terrenoJ ;
+  char terrenoS ;
 
   bool operator==(const estado &n) const
   {
@@ -65,7 +67,14 @@ struct estado
 
   bool operator<(const estado &n) const
   {
-    return (g + h) > (n.g + n.h);
+    return nodo<n.nodo;
+  }
+};
+
+struct compareEstado{
+  bool operator()(const estado &n1, const estado &n2) const
+  {
+    return (n1.g + n1.h) > (n2.g + n2.h);
   }
 };
 

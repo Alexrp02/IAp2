@@ -102,7 +102,7 @@ stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<un
 	return st_result;
 };
 
-estado apply(const Action &accion, const estado &state, const vector<vector<unsigned char>> &mapa, char terreno)
+estado apply(const Action &accion, const estado &state, const vector<vector<unsigned char>> &mapa)
 {
 	estado st_result = state;
 	ubicacion sig_ubicacion;
@@ -115,8 +115,17 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		{
 			st_result.nodo.st.jugador = sig_ubicacion;
 		}
+		if(mapa[sig_ubicacion.f][sig_ubicacion.c] == 'K'){
+			st_result.hasBikini = true;
+			st_result.hasZapatillas = false ;
+		}
+		if(mapa[sig_ubicacion.f][sig_ubicacion.c] == 'D'){
+			st_result.hasBikini = false;
+			st_result.hasZapatillas = true ;
+		}
+			
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoJ)
 		{
 		case 'A':
 			state.hasBikini ? coste = 10 : coste = 100;
@@ -137,7 +146,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		st_result.nodo.st.jugador.brujula = static_cast<Orientacion>((st_result.nodo.st.jugador.brujula + 6) % 8);
 		
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoJ)
 		{
 		case 'A':
 			state.hasBikini ? coste = 5 : coste = 25;
@@ -158,7 +167,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		st_result.nodo.st.jugador.brujula = static_cast<Orientacion>((st_result.nodo.st.jugador.brujula + 2) % 8);
 		
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoJ)
 		{
 		case 'A':
 			state.hasBikini ? coste = 5 : coste = 25;
@@ -183,7 +192,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		}
 		
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoS)
 		{
 		case 'A':
 			state.hasBikini ? coste = 10 : coste = 100;
@@ -204,7 +213,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		st_result.nodo.st.sonambulo.brujula = static_cast<Orientacion>((st_result.nodo.st.sonambulo.brujula + 7) % 8);
 		
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoS)
 		{
 		case 'A':
 			state.hasBikini ? coste = 2 : coste = 7;
@@ -225,7 +234,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		st_result.nodo.st.sonambulo.brujula = static_cast<Orientacion>((st_result.nodo.st.sonambulo.brujula + 1) % 8);
 		
 		// Dependiendo del tipo de terreno y si tiene o no las zapatillas o no, costará más o menos el desplazamiento
-		switch (terreno)
+		switch (state.terrenoS)
 		{
 		case 'A':
 			state.hasBikini ? coste = 2 : coste = 7;
@@ -245,6 +254,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 	default:
 		break;
 	}
+	st_result.terrenoJ = mapa[st_result.nodo.st.jugador.f][st_result.nodo.st.jugador.c];
 	return st_result;
 };
 
@@ -456,13 +466,15 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 	return plan;
 }
 
-list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa, char terreno)
+list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
 	estado current_node;
-	priority_queue<estado> abiertos;
+	priority_queue<estado, vector<estado>, compareEstado> abiertos;
 	set<estado> cerrados;
 	list<Action> plan;
 	current_node.nodo.st = inicio;
+	current_node.terrenoJ = mapa[inicio.jugador.f][inicio.jugador.c];
+	current_node.terrenoS = mapa[inicio.sonambulo.f][inicio.sonambulo.c];
 	bool SolutionFound = (current_node.nodo.st.jugador.f == final.f and current_node.nodo.st.jugador.c == final.c);
 	abiertos.push(current_node);
 
@@ -512,18 +524,22 @@ list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const 
 		// 		}
 		// 	}
 		// }
-
+		// Si el nodo que vamos a generar es la solución, entonces es la solución con menos coste y lo ponemos como solución
+		if (current_node.nodo.st.jugador.c == final.c and current_node.nodo.st.jugador.f == final.f)
+		{
+			SolutionFound = true;
+		}
 		// Estados generados para el jugador
 		// Generar hijo actFORWARD
 		estado childForward = current_node;
-		childForward = apply(actFORWARD, current_node, mapa, terreno);
+		childForward = apply(actFORWARD, current_node, mapa);
 		// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
-		if (childForward.nodo.st.jugador.c == final.c and childForward.nodo.st.jugador.f == final.f)
-		{
-			childForward.nodo.secuencia.push_back(actSON_FORWARD);
-			current_node = childForward;
-			SolutionFound = true;
-		}else
+		// if (childForward.nodo.st.jugador.c == final.c and childForward.nodo.st.jugador.f == final.f)
+		// {
+		// 	childForward.nodo.secuencia.push_back(actFORWARD);
+		// 	current_node = childForward;
+		// 	SolutionFound = true;
+		// }else
 		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
 		if (cerrados.find(childForward) == cerrados.end())
 		{
@@ -535,7 +551,7 @@ list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const 
 		{
 			// Generar hijo actTURN_L
 			estado childTurnL = current_node;
-			childTurnL = apply(actTURN_L, current_node, mapa, terreno);
+			childTurnL = apply(actTURN_L, current_node, mapa);
 			if (cerrados.find(childTurnL) == cerrados.end())
 			{
 				childTurnL.nodo.secuencia.push_back(actTURN_L);
@@ -544,7 +560,7 @@ list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const 
 
 			// Generar hijo actTURN_R
 			estado childTurnR = current_node;
-			childTurnR = apply(actTURN_R, current_node, mapa, terreno);
+			childTurnR = apply(actTURN_R, current_node, mapa);
 			if (cerrados.find(childTurnR) == cerrados.end())
 			{
 				childTurnR.nodo.secuencia.push_back(actTURN_R);
@@ -552,17 +568,18 @@ list<Action> costeUniforme(const stateN0 &inicio, const ubicacion &final, const 
 			}
 		}
 
-		// if (!SolutionFound and !abiertos.empty())
-		// {
+		if (!SolutionFound and !abiertos.empty())
+		{
+			current_node = abiertos.top();
+			while (!abiertos.empty() and cerrados.find(current_node) != cerrados.end())
+			{
+				abiertos.pop();
+				if (!abiertos.empty())
+					current_node = abiertos.top();
+			}
+		}
+		// if(!SolutionFound)
 		// 	current_node = abiertos.top();
-		// 	while (!abiertos.empty() and cerrados.find(current_node) != cerrados.end())
-		// 	{
-		// 		abiertos.pop();
-		// 		if (!abiertos.empty())
-		// 			current_node = abiertos.top();
-		// 	}
-		// }
-		current_node = abiertos.top();
 	}
 
 	if (SolutionFound)
@@ -650,7 +667,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 			plan = AnchuraJugadorSonambulo(c_state, goal, mapaResultado);
 			break;
 		case 2:
-			plan = costeUniforme(c_state, goal, mapaResultado, sensores.terreno[0]);
+			plan = costeUniforme(c_state, goal, mapaResultado);
 		}
 		if (plan.size() > 0)
 		{
