@@ -119,10 +119,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 10 : 100;
+			state.hasBikini ? coste = 10 : coste = 100;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 15 : 50;
+			state.hasZapatillas ? coste = 15 : coste = 50;
 			break;
 		case 'T':
 			coste = 2;
@@ -132,6 +132,7 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 			break;
 		}
 		st_result.g = st_result.g + coste;
+		break;
 	case actTURN_L:
 		st_result.nodo.st.jugador.brujula = static_cast<Orientacion>((st_result.nodo.st.jugador.brujula + 6) % 8);
 		
@@ -139,10 +140,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 25 : 5;
+			state.hasBikini ? coste = 5 : coste = 25;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 5 : 1;
+			state.hasZapatillas ? coste = 1 : coste = 5;
 			break;
 		case 'T':
 			coste = 2;
@@ -160,10 +161,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 25 : 5;
+			state.hasBikini ? coste = 5 : coste = 25;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 5 : 1;
+			state.hasZapatillas ? coste = 1 : coste = 5;
 			break;
 		case 'T':
 			coste = 2;
@@ -185,10 +186,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 10 : 100;
+			state.hasBikini ? coste = 10 : coste = 100;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 15 : 50;
+			state.hasZapatillas ? coste = 15 : coste = 50;
 			break;
 		case 'T':
 			coste = 2;
@@ -206,10 +207,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 7 : 2;
+			state.hasBikini ? coste = 2 : coste = 7;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 3 : 1;
+			state.hasZapatillas ? coste = 1 : coste = 3;
 			break;
 		case 'T':
 			coste = 1;
@@ -227,10 +228,10 @@ estado apply(const Action &accion, const estado &state, const vector<vector<unsi
 		switch (terreno)
 		{
 		case 'A':
-			state.hasBikini ? coste = 7 : 2;
+			state.hasBikini ? coste = 2 : coste = 7;
 			break;
 		case 'B':
-			state.hasZapatillas ? coste = 3 : 1;
+			state.hasZapatillas ? coste = 1 : coste = 3;
 			break;
 		case 'T':
 			coste = 1;

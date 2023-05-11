@@ -55,12 +55,12 @@ struct estado
   nodeN0 nodo;
   int g = 0;
   int h = 0;
-  bool hasBikini;
-  bool hasZapatillas;
+  bool hasBikini = false;
+  bool hasZapatillas = false;
 
   bool operator==(const estado &n) const
   {
-    return (nodo == n.nodo);
+    return (nodo == n.nodo and hasBikini==n.hasBikini and hasZapatillas==n.hasZapatillas);
   }
 
   bool operator<(const estado &n) const
