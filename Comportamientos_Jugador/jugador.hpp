@@ -67,7 +67,13 @@ struct estado
 
   bool operator<(const estado &n) const
   {
-    return nodo<n.nodo;
+    if(!(nodo==n.nodo))
+      return nodo<n.nodo;
+    else if (hasBikini!=n.hasBikini)
+      return hasBikini<n.hasBikini;
+    else if (hasZapatillas!=n.hasZapatillas)
+      return hasZapatillas<n.hasZapatillas;
+    else return false;
   }
 };
 

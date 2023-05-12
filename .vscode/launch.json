@@ -8,7 +8,7 @@
             "program": "${workspaceRoot}/build/practica2",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "build",
-            // "args": ["mapas/mapa30.map", "1", "2", "25", "13", "6", "5", "10", "6", "26", "14"]
+            "args": ["./mapas/mapa50.map", "1", "2", "19", "7", "6", "3", "3", "3", "16", "13"]
             // set environment variables
             // "environment": [
             //     {
