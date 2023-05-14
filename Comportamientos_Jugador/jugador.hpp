@@ -55,24 +55,31 @@ struct estado
   nodeN0 nodo;
   int g = 0;
   int h = 0;
-  bool hasBikini = false;
-  bool hasZapatillas = false;
+  bool JhasBikini = false;
+  bool JhasZapatillas = false;
+  bool ShasBikini = false;
+  bool ShasZapatillas = false;
   char terrenoJ ;
   char terrenoS ;
 
   bool operator==(const estado &n) const
   {
-    return (nodo == n.nodo and hasBikini==n.hasBikini and hasZapatillas==n.hasZapatillas);
+    return (nodo == n.nodo and JhasBikini==n.JhasBikini and JhasZapatillas==n.JhasZapatillas and ShasBikini==n.ShasBikini and ShasZapatillas==n.ShasZapatillas);
   }
 
   bool operator<(const estado &n) const
   {
     if(!(nodo==n.nodo))
       return nodo<n.nodo;
-    else if (hasBikini!=n.hasBikini)
-      return hasBikini<n.hasBikini;
-    else if (hasZapatillas!=n.hasZapatillas)
-      return hasZapatillas<n.hasZapatillas;
+    else if (JhasBikini!=n.JhasBikini)
+      return JhasBikini<n.JhasBikini;
+    else if (JhasZapatillas!=n.JhasZapatillas)
+      return JhasZapatillas<n.JhasZapatillas;
+    // El estado de el jugador es el mismo, comparamos el del sonámbulo
+    else if (ShasBikini!=n.ShasBikini)
+      return ShasBikini<n.ShasBikini;
+    else if (ShasZapatillas!=n.ShasZapatillas)
+      return ShasZapatillas<n.ShasZapatillas;
     else return false;
   }
 };
