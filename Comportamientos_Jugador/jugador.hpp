@@ -50,11 +50,10 @@ struct nodeN0
   }
 };
 
-struct estado
+struct stateN1
 {
-  nodeN0 nodo;
-  int g = 0;
-  int h = 0;
+  ubicacion jugador;
+  ubicacion sonambulo;
   bool JhasBikini = false;
   bool JhasZapatillas = false;
   bool ShasBikini = false;
@@ -62,15 +61,36 @@ struct estado
   char terrenoJ ;
   char terrenoS ;
 
-  bool operator==(const estado &n) const
+  bool operator==(const stateN1 &x) const
   {
-    return (nodo == n.nodo and JhasBikini==n.JhasBikini and JhasZapatillas==n.JhasZapatillas and ShasBikini==n.ShasBikini and ShasZapatillas==n.ShasZapatillas);
+    return (jugador == x.jugador && sonambulo == x.sonambulo  and 
+    JhasBikini==x.JhasBikini and JhasZapatillas==x.JhasZapatillas and ShasBikini==x.ShasBikini and ShasZapatillas==x.ShasZapatillas);
   }
 
-  bool operator<(const estado &n) const
+  stateN1& operator=(const stateN0 &x) {
+    jugador = x.jugador;
+    sonambulo = x.sonambulo;
+    return *this;
+  }
+
+  bool operator<(const stateN1 &n) const
   {
-    if(!(nodo==n.nodo))
-      return nodo<n.nodo;
+    // Comparar el estado del jugador
+    if (jugador.f != n.jugador.f)
+      return jugador.f < n.jugador.f;
+    if (jugador.c != n.jugador.c)
+      return jugador.c < n.jugador.c;
+    if (jugador.brujula != n.jugador.brujula)
+      return jugador.brujula < n.jugador.brujula;
+
+    // Comparar el estado del sonámbulo
+    if (sonambulo.f != n.sonambulo.f)
+      return sonambulo.f < n.sonambulo.f;
+    if (sonambulo.c != n.sonambulo.c)
+      return sonambulo.c < n.sonambulo.c;
+    if (sonambulo.brujula != n.sonambulo.brujula)
+      return sonambulo.brujula < n.sonambulo.brujula;
+    // Comparamos objetos del jugador
     else if (JhasBikini!=n.JhasBikini)
       return JhasBikini<n.JhasBikini;
     else if (JhasZapatillas!=n.JhasZapatillas)
@@ -84,8 +104,21 @@ struct estado
   }
 };
 
+struct nodeN1
+{
+  stateN1 st;
+  list<Action> secuencia;
+  int g = 0;
+  int h = 0;
+
+  bool operator==(const nodeN1 &n) const
+  {
+    return (st == n.st);
+  }
+};
+
 struct compareEstado{
-  bool operator()(const estado &n1, const estado &n2) const
+  bool operator()(const nodeN1 &n1, const nodeN1 &n2) const
   {
     return (n1.g + n1.h) > (n2.g + n2.h);
   }
