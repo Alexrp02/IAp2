@@ -626,7 +626,7 @@ int heuristic(stateN1 st, ubicacion final)
 	// Distancia de Manhattan desde el jugador hasta el área de visión del sonámbulo
 	// int distanciaManhattan = abs(st.jugador.f - st.sonambulo.f) + abs(st.jugador.c - st.sonambulo.c) - 6;
 	// int distanciaManhattan2 = abs(st.jugador.f - final.f) + abs(st.jugador.c - final.c) - 7;
-	return distanciaChebyshev ;//+ distanciaManhattan + distanciaManhattan2;
+	return distanciaChebyshev; //+ distanciaManhattan + distanciaManhattan2;
 }
 
 list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
@@ -1240,7 +1240,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// Si no tenemos plan o hemos hecho reset, lo generamos
 		else if (!hayPlan and !whereIs)
 		{
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
@@ -1261,7 +1261,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// Si hay una colisión con una pared tenemos que recalcular el plan
 		else if (sensores.colision and sensores.terreno[2] == 'M')
 		{
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
@@ -1275,14 +1275,21 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// recalculamos plan pero antes tenemos que saber donde estamos
 		else if (sensores.colision)
 		{
-			accion = actWHEREIS;
-			hayPlan = false;
-			whereIs = true;
+			if (sensores.terreno[2] == 'M')
+			{
+				accion = actWHEREIS;
+				hayPlan = false;
+				whereIs = true;
+			}else {
+				// Si el que ha chocado es el sonambulo, llevamos al jugador a la casilla solución
+				plan = A_star_jugador(c_state1, goal, mapaResultado);
+				hayPlan = true;
+			}
 		}
 		// Si tenemos un precipicio delante, tenemos que recalcular el plan
 		else if (sensores.terreno[2] == 'P')
 		{
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
