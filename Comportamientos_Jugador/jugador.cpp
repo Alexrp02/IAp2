@@ -57,8 +57,8 @@ bool Find(const stateN0 &item, const list<nodeN0> &lista)
 
 bool ComportamientoJugador::casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa)
 {
-	if (x.f>=mapa.size() or x.c>=mapa.size())
-		return false ;
+	if (x.f >= mapa.size() or x.c >= mapa.size())
+		return false;
 	if (mapa[x.f][x.c] == '?')
 		return true;
 	// Devolvemos si la casilla es transitable o no
@@ -625,7 +625,7 @@ int heuristic(stateN1 st, ubicacion final)
 	int distanciaChebyshev = max(abs(st.sonambulo.f - final.f), abs(st.sonambulo.c - final.c));
 	// Distancia de Manhattan desde el jugador hasta el área de visión del sonámbulo
 	// int distanciaManhattan = abs(st.jugador.f - st.sonambulo.f) + abs(st.jugador.c - st.sonambulo.c) - 6;
-	return distanciaChebyshev ;//+ distanciaManhattan;
+	return distanciaChebyshev; //+ distanciaManhattan;
 }
 
 list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
@@ -1010,9 +1010,10 @@ void ComportamientoJugador::dibujarRecto(const vector<unsigned char> &terreno, c
 			{
 				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
 				{
-					if(terreno[cont] == 'X'){
+					if (terreno[cont] == 'X')
+					{
 						bateria.f = st.f + filaInicial;
-						bateria.c = st.c + columnaInicial ;
+						bateria.c = st.c + columnaInicial;
 						bateriaVista = true;
 					}
 					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
@@ -1024,9 +1025,10 @@ void ComportamientoJugador::dibujarRecto(const vector<unsigned char> &terreno, c
 			{
 				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
 				{
-					if(terreno[cont] == 'X'){
+					if (terreno[cont] == 'X')
+					{
 						bateria.f = st.f + filaInicial;
-						bateria.c = st.c + columnaInicial ;
+						bateria.c = st.c + columnaInicial;
 						bateriaVista = true;
 					}
 					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
@@ -1120,8 +1122,8 @@ Action ComportamientoJugador::think(Sensores sensores)
 	}
 	else if (sensores.nivel == 4)
 	{
-		if(last_action==actWHEREIS)
-			c_state1 = c_stateN1 ;
+		if (last_action == actWHEREIS)
+			c_state1 = c_stateN1;
 		// Actualizamos la variable de estado
 		int a;
 		// Si sabemos dónde estamos con certeza, actualizamos la variable de estado y el mapa
@@ -1223,45 +1225,51 @@ Action ComportamientoJugador::think(Sensores sensores)
 		}
 
 		// Si necesitamos la recarga no haremos ningún plan, esperamos a estar recargados
-		if(needRecarga) {
-			accion = actIDLE ;
+		if (needRecarga)
+		{
+			accion = actIDLE;
 		}
 		// Si tenemos poca batería, llevamos a el jugador hasta la casilla de recarga
-		else if(sensores.bateria<1000 and bateriaVista)
+		else if (sensores.bateria < 1000 and bateriaVista)
 		{
 			plan = A_star_jugador(c_state1, bateria, mapaResultado);
 			hayPlan = true;
 		}
 
 		// Si no tenemos plan o hemos hecho reset, lo generamos
-		else if (!hayPlan and !whereIs){
+		else if (!hayPlan and !whereIs)
+		{
 			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
-			if(plan.size() == 0) {
+			if (plan.size() == 0)
+			{
 				plan = A_star_jugador(c_state1, goal, mapaResultado);
 			}
-			hayPlan = true ;
+			hayPlan = true;
 		}
-			
+
 		// Si hacemos reset tenemos que volver a saber la posición de los jugadores y además tenemos que recalcular el plan
-		else if (sensores.reset){
+		else if (sensores.reset)
+		{
 			accion = actWHEREIS;
 			hayPlan = false;
 			whereIs = true;
 		}
 
 		// Si hay una colisión con una pared tenemos que recalcular el plan
-		else if (sensores.colision and sensores.terreno[2] == 'M'){
+		else if (sensores.colision and sensores.terreno[2] == 'M')
+		{
 			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
-			if(plan.size() == 0) {
+			if (plan.size() == 0)
+			{
 				plan = A_star_jugador(c_state1, goal, mapaResultado);
 			}
 			hayPlan = true;
 		}
-			
+
 		// Si tenemos una colisión y no tenemos un muro delante, es que ha sido por el empuje de un lobo,
 		// recalculamos plan pero antes tenemos que saber donde estamos
 		else if (sensores.colision)
@@ -1271,11 +1279,13 @@ Action ComportamientoJugador::think(Sensores sensores)
 			whereIs = true;
 		}
 		// Si tenemos un precipicio delante, tenemos que recalcular el plan
-		else if (sensores.terreno[2] == 'P'){
+		else if (sensores.terreno[2] == 'P')
+		{
 			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
-			if(plan.size() == 0) {
+			if (plan.size() == 0)
+			{
 				plan = A_star_jugador(c_state1, goal, mapaResultado);
 			}
 			hayPlan = true;
@@ -1293,6 +1303,14 @@ Action ComportamientoJugador::think(Sensores sensores)
 		{
 			VisualizaPlan(c_state1, plan);
 		}
+		// Si estamos en la casilla de batería y tenemos poca batería, recargamos
+		if (sensores.terreno[0] == 'X' and sensores.bateria < 3000)
+		{
+			accion = actIDLE;
+			needRecarga = true;
+		}
+		else if (sensores.bateria == 3000)
+			needRecarga = false;
 	}
 
 	if (hayPlan and plan.size() > 0)
@@ -1306,14 +1324,6 @@ Action ComportamientoJugador::think(Sensores sensores)
 		cout << "Se ha tardado " << sensores.tiempo << endl;
 		hayPlan = false;
 	}
-	
-	// Si estamos en la casilla de batería y tenemos poca batería, recargamos
-	if(sensores.terreno[0]=='X' and sensores.bateria<3000){
-		accion = actIDLE;
-		needRecarga = true;
-	}
-	else if (sensores.bateria == 3000)
-		needRecarga = false;
 
 	last_action = accion;
 	return accion;
