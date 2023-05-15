@@ -202,8 +202,13 @@ private:
   stateN1 c_state1;
   Action last_action ;
   ubicacion goal;
+  ubicacion bateria;
+  bool bateriaVista = false; 
+  bool needRecarga = false ;
   int costeDesconocida = 1 ;
   int factorDeAumento = 3;
+  void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vector<vector<unsigned char>> &matriz, int factor, bool sumaColumna);
+  void dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, vector<vector<unsigned char>> &matriz);
   bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
   stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<unsigned char>> &mapa);
   nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsigned char>> &mapa);
@@ -211,6 +216,7 @@ private:
   list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa);
   list<Action> costeUniforme(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa) ;
   list<Action> A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa) ;
+  list<Action> A_star_jugador(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa) ;
 };
 
 #endif

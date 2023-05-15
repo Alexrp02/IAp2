@@ -767,6 +767,145 @@ list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacio
 	return plan;
 }
 
+list<Action> ComportamientoJugador::A_star_jugador(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
+{
+	nodeN1 current_node;
+	priority_queue<nodeN1, vector<nodeN1>, compareEstado> abiertos;
+	set<stateN1> cerrados;
+	list<Action> plan;
+	current_node.st = inicio;
+	// Si el jugador empieza en una casilla de bikini o zapatillas se lo ponemos.
+	if (mapa[inicio.jugador.f][inicio.jugador.c] == 'K')
+	{
+		current_node.st.JhasBikini = true;
+		current_node.st.JhasZapatillas = false;
+	}
+	if (mapa[inicio.jugador.f][inicio.jugador.c] == 'D')
+	{
+		current_node.st.JhasBikini = false;
+		current_node.st.JhasZapatillas = true;
+	}
+
+	// Si el sonambulo empieza en una casilla de bikini o zapatillas se lo ponemos.
+	if (mapa[inicio.sonambulo.f][inicio.sonambulo.c] == 'K')
+	{
+		current_node.st.ShasBikini = true;
+		current_node.st.ShasZapatillas = false;
+	}
+	if (mapa[inicio.sonambulo.f][inicio.sonambulo.c] == 'D')
+	{
+		current_node.st.ShasBikini = false;
+		current_node.st.ShasZapatillas = true;
+	}
+	current_node.st.terrenoJ = mapa[inicio.jugador.f][inicio.jugador.c];
+	current_node.st.terrenoS = mapa[inicio.sonambulo.f][inicio.sonambulo.c];
+	bool SolutionFound = (current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c);
+	abiertos.push(current_node);
+
+	while (!abiertos.empty() and !SolutionFound)
+	{
+		// Quitamos el nodo que está siendo evaluado de abiertos y lo metemos en cerrados
+		abiertos.pop();
+		cerrados.insert(current_node.st);
+
+		// Si el nodo que vamos a generar es la solución, entonces es la solución con menos coste y lo ponemos como solución
+		if (current_node.st.jugador.c == final.c and current_node.st.jugador.f == final.f)
+		{
+			SolutionFound = true;
+			cout << "Nodos abiertos: " << abiertos.size() << endl;
+			cout << "Nodos cerrados: " << cerrados.size() << endl;
+		}
+
+		// // Estados generados para el sonámbulo si está en visión.
+		// if (sonambuloEnVision(current_node.st) and !SolutionFound)
+		// {
+		// 	// Generar hijo actSON_FORWARD
+		// 	nodeN1 childSonForward = current_node;
+		// 	childSonForward = apply(actSON_FORWARD, current_node, mapa);
+		// 	childSonForward.h = heuristic(childSonForward.st, final);
+		// 	if (cerrados.find(childSonForward.st) == cerrados.end())
+		// 	{
+		// 		childSonForward.secuencia.push_back(actSON_FORWARD);
+		// 		abiertos.push(childSonForward);
+		// 	}
+
+		// 	// Generar hijo actTURN_L
+		// 	nodeN1 childSonTurnL = current_node;
+		// 	childSonTurnL = apply(actSON_TURN_SL, current_node, mapa);
+		// 	childSonTurnL.h = heuristic(childSonTurnL.st, final);
+		// 	if (cerrados.find(childSonTurnL.st) == cerrados.end())
+		// 	{
+		// 		childSonTurnL.secuencia.push_back(actSON_TURN_SL);
+		// 		abiertos.push(childSonTurnL);
+		// 	}
+
+		// 	// Generar hijo actTURN_R
+		// 	nodeN1 childSonTurnR = current_node;
+		// 	childSonTurnR = apply(actSON_TURN_SR, current_node, mapa);
+		// 	childSonTurnR.h = heuristic(childSonTurnR.st, final);
+		// 	if (cerrados.find(childSonTurnR.st) == cerrados.end())
+		// 	{
+		// 		childSonTurnR.secuencia.push_back(actSON_TURN_SR);
+		// 		abiertos.push(childSonTurnR);
+		// 	}
+		// }
+		// Si el sonámbulo no está en visión y no se ha encontrado una solución, entonces generamos los estados que mueven al jugador
+		if (!SolutionFound)
+		{
+			// Estados generados para el jugador
+			// Generar hijo actFORWARD
+			nodeN1 childForward = current_node;
+			childForward = apply(actFORWARD, current_node, mapa);
+			childForward.h = heuristic(childForward.st, final);
+
+			// Si el hijo generado no está en cerrados, entonces se añade a abiertos
+			if (cerrados.find(childForward.st) == cerrados.end())
+			{
+				childForward.secuencia.push_back(actFORWARD);
+				abiertos.push(childForward);
+			}
+
+			// Generar hijo actTURN_L
+			nodeN1 childTurnL = current_node;
+			childTurnL = apply(actTURN_L, current_node, mapa);
+			childTurnL.h = heuristic(childTurnL.st, final);
+			if (cerrados.find(childTurnL.st) == cerrados.end())
+			{
+				childTurnL.secuencia.push_back(actTURN_L);
+				abiertos.push(childTurnL);
+			}
+
+			// Generar hijo actTURN_R
+			nodeN1 childTurnR = current_node;
+			childTurnR = apply(actTURN_R, current_node, mapa);
+			childTurnR.h = heuristic(childTurnR.st, final);
+			if (cerrados.find(childTurnR.st) == cerrados.end())
+			{
+				childTurnR.secuencia.push_back(actTURN_R);
+				abiertos.push(childTurnR);
+			}
+		}
+		if (!SolutionFound and !abiertos.empty())
+		{
+			current_node = abiertos.top();
+			while (!abiertos.empty() and cerrados.find(current_node.st) != cerrados.end())
+			{
+				abiertos.pop();
+				if (!abiertos.empty())
+					current_node = abiertos.top();
+			}
+		}
+	}
+
+	if (SolutionFound)
+	{
+		cout << "Coste de el camino: " << current_node.g << endl;
+		plan = current_node.secuencia;
+	}
+
+	return plan;
+}
+
 // Función que pone a 0 todos los elementos de una matriz
 void AnularMatriz(vector<vector<unsigned char>> &matriz)
 {
@@ -847,7 +986,7 @@ void ComportamientoJugador::VisualizaPlan(const stateN1 &st, const list<Action> 
 }
 
 // Método para dibujar cuando la orientación no es diagonal
-void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vector<vector<unsigned char>> &matriz, int factor, bool sumaColumna)
+void ComportamientoJugador::dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vector<vector<unsigned char>> &matriz, int factor, bool sumaColumna)
 {
 	int cont = 1;
 
@@ -871,6 +1010,11 @@ void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vec
 			{
 				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
 				{
+					if(terreno[cont] == 'X'){
+						bateria.f = st.f + filaInicial;
+						bateria.c = st.c + columnaInicial ;
+						bateriaVista = true;
+					}
 					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
 					cont++;
 					columnaInicial -= factor;
@@ -880,6 +1024,11 @@ void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vec
 			{
 				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
 				{
+					if(terreno[cont] == 'X'){
+						bateria.f = st.f + filaInicial;
+						bateria.c = st.c + columnaInicial ;
+						bateriaVista = true;
+					}
 					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
 					cont++;
 					filaInicial -= factor;
@@ -890,7 +1039,7 @@ void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vec
 }
 
 // Método para actualizar el mapa con la información de los sensores
-void dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, vector<vector<unsigned char>> &matriz)
+void ComportamientoJugador::dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, vector<vector<unsigned char>> &matriz)
 {
 	switch (st.jugador.brujula)
 	{
@@ -1073,10 +1222,25 @@ Action ComportamientoJugador::think(Sensores sensores)
 			dibujarEnMatriz(sensores.terreno, c_state1, mapaResultado);
 		}
 
+		// Si necesitamos la recarga no haremos ningún plan, esperamos a estar recargados
+		if(needRecarga) {
+			accion = actIDLE ;
+		}
+		// Si tenemos poca batería, llevamos a el jugador hasta la casilla de recarga
+		else if(sensores.bateria<1000 and bateriaVista)
+		{
+			plan = A_star_jugador(c_state1, bateria, mapaResultado);
+			hayPlan = true;
+		}
+
 		// Si no tenemos plan o hemos hecho reset, lo generamos
-		if (!hayPlan and !whereIs){
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+		else if (!hayPlan and !whereIs){
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
+			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
+			if(plan.size() == 0) {
+				plan = A_star_jugador(c_state1, goal, mapaResultado);
+			}
 			hayPlan = true ;
 		}
 			
@@ -1089,8 +1253,12 @@ Action ComportamientoJugador::think(Sensores sensores)
 
 		// Si hay una colisión con una pared tenemos que recalcular el plan
 		else if (sensores.colision and sensores.terreno[2] == 'M'){
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
+			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
+			if(plan.size() == 0) {
+				plan = A_star_jugador(c_state1, goal, mapaResultado);
+			}
 			hayPlan = true;
 		}
 			
@@ -1104,8 +1272,12 @@ Action ComportamientoJugador::think(Sensores sensores)
 		}
 		// Si tenemos un precipicio delante, tenemos que recalcular el plan
 		else if (sensores.terreno[2] == 'P'){
-			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
+			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
+			if(plan.size() == 0) {
+				plan = A_star_jugador(c_state1, goal, mapaResultado);
+			}
 			hayPlan = true;
 		}
 
@@ -1134,8 +1306,14 @@ Action ComportamientoJugador::think(Sensores sensores)
 		cout << "Se ha tardado " << sensores.tiempo << endl;
 		hayPlan = false;
 	}
-
-	// Incluir aquí el comportamiento del agente jugador
+	
+	// Si estamos en la casilla de batería y tenemos poca batería, recargamos
+	if(sensores.terreno[0]=='X' and sensores.bateria<3000){
+		accion = actIDLE;
+		needRecarga = true;
+	}
+	else if (sensores.bateria == 3000)
+		needRecarga = false;
 
 	last_action = accion;
 	return accion;
