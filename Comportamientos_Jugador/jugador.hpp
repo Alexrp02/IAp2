@@ -135,12 +135,51 @@ public:
   // Constructor para cuando no se conoce el mapa
   ComportamientoJugador(unsigned int size) : Comportamiento(size)
   {
+    // Inicializamos el mapaResultado con los precipicios de los bordes
+    for (unsigned int i = 0; i < size; i++)
+    {
+      // Filas
+      mapaResultado[0][i] = 'P';
+      mapaResultado[1][i] = 'P';
+      mapaResultado[2][i] = 'P';
+      mapaResultado[size - 1][i] = 'P';
+      mapaResultado[size - 2][i] = 'P';
+      mapaResultado[size - 3][i] = 'P';
+
+      // Columnas
+      mapaResultado[i][0] = 'P';
+      mapaResultado[i][1] = 'P';
+      mapaResultado[i][2] = 'P';
+      mapaResultado[i][size - 1] = 'P';
+      mapaResultado[i][size - 2] = 'P';
+      mapaResultado[i][size - 3] = 'P';
+    }
+
     // Inicializar Variables de Estado
     hayPlan = false;
   }
   // Constructor para cuando se conoce el mapa
   ComportamientoJugador(std::vector<std::vector<unsigned char>> mapaR) : Comportamiento(mapaR)
   {
+    // Inicializamos el mapaResultado con los precipicios de los bordes
+    for (unsigned int i = 0; i < mapaR.size(); i++)
+    {
+      // Filas
+      mapaResultado[0][i] = 'P';
+      mapaResultado[1][i] = 'P';
+      mapaResultado[2][i] = 'P';
+      mapaResultado[mapaR.size() - 1][i] = 'P';
+      mapaResultado[mapaR.size() - 2][i] = 'P';
+      mapaResultado[mapaR.size() - 3][i] = 'P';
+
+      // Columnas
+      mapaResultado[i][0] = 'P';
+      mapaResultado[i][1] = 'P';
+      mapaResultado[i][2] = 'P';
+      mapaResultado[i][mapaR.size() - 1] = 'P';
+      mapaResultado[i][mapaR.size() - 2] = 'P';
+      mapaResultado[i][mapaR.size() - 3] = 'P';
+    }
     // Inicializar Variables de Estado
     hayPlan = false;
   }
@@ -148,16 +187,29 @@ public:
   ~ComportamientoJugador() {}
 
   void VisualizaPlan(const stateN0 &st, const list<Action> &plan);
+  void VisualizaPlan(const stateN1 &st, const list<Action> &plan);
 
   Action think(Sensores sensores);
   int interact(Action accion, int valor);
+  
 
 private:
   // Declarar Variables de Estado
   bool hayPlan;
+  bool whereIs = true; // Variable para saber si hay que ejecutar accion actWHEREIS
   list<Action> plan;
   stateN0 c_state;
+  stateN1 c_state1;
+  Action last_action ;
   ubicacion goal;
+  int costeDesconocida = 1 ;
+  bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
+  stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<unsigned char>> &mapa);
+  nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsigned char>> &mapa);
+  list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa);
+  list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa);
+  list<Action> costeUniforme(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa) ;
+  list<Action> A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa) ;
 };
 
 #endif

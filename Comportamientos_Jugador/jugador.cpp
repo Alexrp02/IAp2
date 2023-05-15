@@ -55,8 +55,12 @@ bool Find(const stateN0 &item, const list<nodeN0> &lista)
 	return (!(it == lista.end()));
 };
 
-bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa)
+bool ComportamientoJugador::casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa)
 {
+	if (x.f>=mapa.size() or x.c>=mapa.size())
+		return false ;
+	if (mapa[x.f][x.c] == '?')
+		return true;
 	// Devolvemos si la casilla es transitable o no
 	return (mapa[x.f][x.c] != 'P' and mapa[x.f][x.c] != 'M');
 };
@@ -64,7 +68,7 @@ bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> 
 // Tres parámetros de entrada: la acción que se quiere realizar, el estado actual y el mapa del juego
 // Devuelve el estado que se genera si se puede avanzar, si no, devuelve como salida el mismo estado que el de entrada
 // Lo mismo pero para las acciones del sonánmbulo.
-stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<unsigned char>> &mapa)
+stateN0 ComportamientoJugador::apply(const Action &accion, const stateN0 &state, const vector<vector<unsigned char>> &mapa)
 {
 	stateN0 st_result = state;
 	ubicacion sig_ubicacion;
@@ -102,7 +106,7 @@ stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<un
 	return st_result;
 };
 
-nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsigned char>> &mapa)
+nodeN1 ComportamientoJugador::apply(const Action &accion, const nodeN1 &node, const vector<vector<unsigned char>> &mapa)
 {
 	nodeN1 st_result = node;
 	ubicacion sig_ubicacion;
@@ -138,6 +142,9 @@ nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsig
 			break;
 		case 'T':
 			coste = 2;
+			break;
+		case '?':
+			coste = costeDesconocida;
 			break;
 		default:
 			coste = 1;
@@ -217,6 +224,9 @@ nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsig
 			break;
 		case 'T':
 			coste = 2;
+			break;
+		case '?':
+			coste = costeDesconocida;
 			break;
 		default:
 			coste = 1;
@@ -327,7 +337,7 @@ bool sonambuloEnVision(const stateN1 &st)
 	}
 }
 
-list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
+list<Action> ComportamientoJugador::AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
 	nodeN0 current_node;
 	list<nodeN0> abiertos;
@@ -399,7 +409,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 	return plan;
 }
 
-list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
+list<Action> ComportamientoJugador::AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
 	nodeN0 current_node;
 	queue<nodeN0> abiertos;
@@ -458,7 +468,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 			}
 		}
 
-			if (!SolutionFound)
+		if (!SolutionFound)
 		{
 			// Estados generados para el jugador
 			// Generar hijo actFORWARD
@@ -507,7 +517,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 	return plan;
 }
 
-list<Action> costeUniforme(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
+list<Action> ComportamientoJugador::costeUniforme(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
 	nodeN1 current_node;
 	priority_queue<nodeN1, vector<nodeN1>, compareEstado> abiertos;
@@ -536,62 +546,17 @@ list<Action> costeUniforme(const stateN1 &inicio, const ubicacion &final, const 
 		abiertos.pop();
 		cerrados.insert(current_node.st);
 
-		// // Estados generados para el sonámbulo si está en visión.
-		// if (sonambuloEnVision(current_node.nodo.st))
-		// {
-		// 	// Generar hijo actSON_FORWARD
-		// 	estado childSonForward = current_node;
-		// 	childSonForward = apply(actSON_FORWARD, current_node, mapa, terreno);
-		// 	// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
-		// 	if (childSonForward.nodo.st.sonambulo.c == final.c and childSonForward.nodo.st.sonambulo.f == final.f)
-		// 	{
-		// 		childSonForward.nodo.secuencia.push_back(actSON_FORWARD);
-		// 		current_node = childSonForward;
-		// 		SolutionFound = true;
-		// 	}
-		// 	else if (cerrados.find(childSonForward) == cerrados.end())
-		// 	{
-		// 		childSonForward.nodo.secuencia.push_back(actSON_FORWARD);
-		// 		abiertos.push(childSonForward);
-		// 	}
-
-		// 	if (!SolutionFound)
-		// 	{
-		// 		// Generar hijo actTURN_L
-		// 		estado childSonTurnL = current_node;
-		// 		childSonTurnL = apply(actSON_TURN_SL, current_node, mapa, terreno);
-		// 		if (cerrados.find(childSonTurnL) == cerrados.end())
-		// 		{
-		// 			childSonTurnL.nodo.secuencia.push_back(actSON_TURN_SL);
-		// 			abiertos.push(childSonTurnL);
-		// 		}
-
-		// 		// Generar hijo actTURN_R
-		// 		estado childSonTurnR = current_node;
-		// 		childSonTurnR = apply(actSON_TURN_SR, current_node, mapa, terreno);
-		// 		if (cerrados.find(childSonTurnR) == cerrados.end())
-		// 		{
-		// 			childSonTurnR.nodo.secuencia.push_back(actSON_TURN_SR);
-		// 			abiertos.push(childSonTurnR);
-		// 		}
-		// 	}
-		// }
 		// Si el nodo que vamos a generar es la solución, entonces es la solución con menos coste y lo ponemos como solución
 		if (current_node.st.jugador.c == final.c and current_node.st.jugador.f == final.f)
 		{
 			SolutionFound = true;
 		}
+
 		// Estados generados para el jugador
 		// Generar hijo actFORWARD
 		nodeN1 childForward = current_node;
 		childForward = apply(actFORWARD, current_node, mapa);
-		// Si el hijo generado tiene la misma posición que la final, lo pondremos como solución
-		// if (childForward.nodo.st.jugador.c == final.c and childForward.nodo.st.jugador.f == final.f)
-		// {
-		// 	childForward.nodo.secuencia.push_back(actFORWARD);
-		// 	current_node = childForward;
-		// 	SolutionFound = true;
-		// }else
+
 		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
 		if (cerrados.find(childForward.st) == cerrados.end())
 		{
@@ -630,8 +595,6 @@ list<Action> costeUniforme(const stateN1 &inicio, const ubicacion &final, const 
 					current_node = abiertos.top();
 			}
 		}
-		// if(!SolutionFound)
-		// 	current_node = abiertos.top();
 	}
 
 	if (SolutionFound)
@@ -653,7 +616,7 @@ int heuristic(stateN1 st, ubicacion final)
 	return distanciaChebyshev; //+ distanciaManhattan;
 }
 
-list<Action> A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
+list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
 {
 	nodeN1 current_node;
 	priority_queue<nodeN1, vector<nodeN1>, compareEstado> abiertos;
@@ -837,6 +800,103 @@ void ComportamientoJugador::VisualizaPlan(const stateN0 &st, const list<Action> 
 	}
 }
 
+void ComportamientoJugador::VisualizaPlan(const stateN1 &st, const list<Action> &plan)
+{
+	AnularMatriz(mapaConPlan);
+	stateN1 cst = st;
+	auto it = plan.begin();
+	while (it != plan.end())
+	{
+		switch (*it)
+		{
+		case actFORWARD:
+			cst.jugador = nextCasilla(cst.jugador);
+			mapaConPlan[cst.jugador.f][cst.jugador.c] = 1;
+			break;
+		case actTURN_L:
+			cst.jugador.brujula = static_cast<Orientacion>((cst.jugador.brujula + 6) % 8);
+			break;
+		case actTURN_R:
+			cst.jugador.brujula = static_cast<Orientacion>((cst.jugador.brujula + 2) % 8);
+			break;
+		case actSON_FORWARD:
+			cst.sonambulo = nextCasilla(cst.sonambulo);
+			mapaConPlan[cst.sonambulo.f][cst.sonambulo.c] = 2;
+			break;
+		case actSON_TURN_SL:
+			cst.sonambulo.brujula = static_cast<Orientacion>((cst.sonambulo.brujula + 7) % 8);
+			break;
+		case actSON_TURN_SR:
+			cst.sonambulo.brujula = static_cast<Orientacion>((cst.sonambulo.brujula + 1) % 8);
+			break;
+		}
+		it++;
+	}
+}
+
+// Método para dibujar cuando la orientación no es diagonal
+void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vector<vector<unsigned char>> &matriz, int factor, bool sumaColumna)
+{
+	int cont = 1;
+
+	int filaInicial;
+	int columnaInicial;
+	for (int i = 1; i <= 3; i++)
+	{
+		if (sumaColumna)
+		{
+			columnaInicial = filaInicial = i * factor;
+		}
+		else
+		{
+			filaInicial = i * factor;
+			columnaInicial = i * (-factor);
+		}
+		for (int j = 0; j < 1 + i * 2; j++)
+		{
+
+			if (sumaColumna)
+			{
+				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
+				{
+					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
+					cont++;
+					columnaInicial -= factor;
+				}
+			}
+			else
+			{
+				if (st.f + filaInicial >= 0 and st.f + filaInicial < matriz.size() and st.c + columnaInicial >= 0 and st.c + columnaInicial < matriz[0].size())
+				{
+					matriz[st.f + filaInicial][st.c + columnaInicial] = terreno[cont];
+					cont++;
+					filaInicial -= factor;
+				}
+			}
+		}
+	}
+}
+
+// Método para actualizar el mapa con la información de los sensores
+void dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, vector<vector<unsigned char>> &matriz)
+{
+	switch (st.jugador.brujula)
+	{
+	case norte:
+		dibujarRecto(terreno, st.jugador, matriz, -1, true);
+		break;
+	case sur:
+		dibujarRecto(terreno, st.jugador, matriz, 1, true);
+		break;
+	case este:
+		dibujarRecto(terreno, st.jugador, matriz, -1, false);
+		break;
+	case oeste:
+		dibujarRecto(terreno, st.jugador, matriz, 1, false);
+		break;
+	}
+}
+
 // Este es el método principal que se piden en la practica.
 // Tiene como entrada la información de los sensores y devuelve la acción a realizar.
 // Para ver los distintos sensores mirar fichero "comportamiento.hpp"
@@ -844,21 +904,22 @@ void ComportamientoJugador::VisualizaPlan(const stateN0 &st, const list<Action> 
 Action ComportamientoJugador::think(Sensores sensores)
 {
 	Action accion = actIDLE;
+
+	// Actualizamos la variable de estado
+	c_state.jugador.f = sensores.posF;
+	c_state.jugador.c = sensores.posC;
+	c_state.jugador.brujula = sensores.sentido;
+	c_state.sonambulo.f = sensores.SONposF;
+	c_state.sonambulo.c = sensores.SONposC;
+	c_state.sonambulo.brujula = sensores.SONsentido;
+	goal.f = sensores.destinoF;
+	goal.c = sensores.destinoC;
+	stateN1 c_stateN1;
+	c_stateN1 = c_state;
 	// Si no hay plan se genera uno
-	if (!hayPlan)
+	if (!hayPlan and sensores.nivel != 4)
 	{
 		cout << "Generando plan..." << endl;
-		// Actualizamos la variable de estado
-		c_state.jugador.f = sensores.posF;
-		c_state.jugador.c = sensores.posC;
-		c_state.jugador.brujula = sensores.sentido;
-		c_state.sonambulo.f = sensores.SONposF;
-		c_state.sonambulo.c = sensores.SONposC;
-		c_state.sonambulo.brujula = sensores.SONsentido;
-		goal.f = sensores.destinoF;
-		goal.c = sensores.destinoC;
-		stateN1 c_stateN1;
-		c_stateN1 = c_state;
 		// Invocar al método de búsqueda dependiendo del nivel en el que estemos
 		switch (sensores.nivel)
 		{
@@ -881,6 +942,156 @@ Action ComportamientoJugador::think(Sensores sensores)
 			hayPlan = true;
 		}
 	}
+	else if (sensores.nivel == 4)
+	{
+		if(last_action==actWHEREIS)
+			c_state1 = c_stateN1 ;
+		// Actualizamos la variable de estado
+		int a;
+		// Si sabemos dónde estamos con certeza, actualizamos la variable de estado y el mapa
+		if (!whereIs and !sensores.colision and !sensores.reset)
+		{
+			switch (last_action)
+			{
+			case actFORWARD:
+				// Actualización en caso de avanzar
+				switch (c_state1.jugador.brujula)
+				{
+				case norte:
+					c_state1.jugador.f--;
+					break;
+				case noreste:
+					c_state1.jugador.f--;
+					c_state1.jugador.c++;
+					break;
+				case este:
+					c_state1.jugador.c++;
+					break;
+				case sureste: /*Actualizacion*/
+					c_state1.jugador.f++;
+					c_state1.jugador.c++;
+					break;
+				case sur: /*Actualizacion*/
+					c_state1.jugador.f++;
+					break;
+				case suroeste: /*Actualizacion*/
+					c_state1.jugador.f++;
+					c_state1.jugador.c--;
+					break;
+				case oeste: /*Actualizacion*/
+					c_state1.jugador.c--;
+					break;
+				case noroeste: /*Actualizacion*/
+					c_state1.jugador.f--;
+					c_state1.jugador.c--;
+					break;
+				}
+				break;
+			case actTURN_L:
+				a = c_state1.jugador.brujula;
+				a = (a + 6) % 8;
+				c_state1.jugador.brujula = static_cast<Orientacion>(a);
+				break;
+			case actTURN_R:
+				a = c_state1.jugador.brujula;
+				a = (a + 2) % 8;
+				c_state1.jugador.brujula = static_cast<Orientacion>(a);
+				break;
+			case actSON_FORWARD:
+				switch (c_state1.sonambulo.brujula)
+				{
+				case norte:
+					c_state1.sonambulo.f--;
+					break;
+				case noreste:
+					c_state1.sonambulo.f--;
+					c_state1.sonambulo.c++;
+					break;
+				case este:
+					c_state1.sonambulo.c++;
+					break;
+				case sureste: /*Actualizacion*/
+					c_state1.sonambulo.f++;
+					c_state1.sonambulo.c++;
+					break;
+				case sur: /*Actualizacion*/
+					c_state1.sonambulo.f++;
+					break;
+				case suroeste: /*Actualizacion*/
+					c_state1.sonambulo.f++;
+					c_state1.sonambulo.c--;
+					break;
+				case oeste: /*Actualizacion*/
+					c_state1.sonambulo.c--;
+					break;
+				case noroeste: /*Actualizacion*/
+					c_state1.sonambulo.f--;
+					c_state1.sonambulo.c--;
+					break;
+				}
+				break;
+			case actSON_TURN_SL:
+				a = c_state1.sonambulo.brujula;
+				a = (a + 7) % 8;
+				c_state1.sonambulo.brujula = static_cast<Orientacion>(a);
+				break;
+			case actSON_TURN_SR:
+				a = c_state1.sonambulo.brujula;
+				a = (a + 1) % 8;
+				c_state1.sonambulo.brujula = static_cast<Orientacion>(a);
+				break;
+			}
+
+			// Tenemos que actualizar el mapa
+			dibujarEnMatriz(sensores.terreno, c_state1, mapaResultado);
+		}
+
+		// Si no tenemos plan o hemos hecho reset, lo generamos
+		if (!hayPlan and !whereIs){
+			plan = A_star(c_state1, goal, mapaResultado);
+			hayPlan = true ;
+		}
+			
+		// Si hacemos reset tenemos que volver a saber la posición de los jugadores y además tenemos que recalcular el plan
+		else if (sensores.reset){
+			accion = actWHEREIS;
+			hayPlan = false;
+			whereIs = true;
+		}
+
+		// Si hay una colisión con una pared tenemos que recalcular el plan
+		else if (sensores.colision and sensores.terreno[2] == 'M'){
+			plan = A_star(c_state1, goal, mapaResultado);
+			hayPlan = true;
+		}
+			
+		// Si tenemos una colisión y no tenemos un muro delante, es que ha sido por el empuje de un lobo,
+		// recalculamos plan pero antes tenemos que saber donde estamos
+		else if (sensores.colision)
+		{
+			accion = actWHEREIS;
+			hayPlan = false;
+			whereIs = true;
+		}
+		// Si tenemos un precipicio delante, tenemos que recalcular el plan
+		else if (sensores.terreno[2] == 'P'){
+			plan = A_star(c_state1, goal, mapaResultado);
+			hayPlan = true;
+		}
+
+		// Si el nivel en el que estamos es el 4, primero tenemos que usar actWHEREIS
+		else if (sensores.nivel == 4 and whereIs)
+		{
+			accion = actWHEREIS;
+			VisualizaPlan(c_state1, plan);
+			whereIs = false;
+			hayPlan = false;
+		}
+		if (plan.size() > 0 and !whereIs)
+		{
+			VisualizaPlan(c_state1, plan);
+		}
+	}
 
 	if (hayPlan and plan.size() > 0)
 	{
@@ -896,6 +1107,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 
 	// Incluir aquí el comportamiento del agente jugador
 
+	last_action = accion;
 	return accion;
 }
 
