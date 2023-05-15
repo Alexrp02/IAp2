@@ -611,9 +611,9 @@ int heuristic(stateN1 st, ubicacion final)
 {
 	// Distancia de Chebyshev desde el sonámbulo a la posición final
 	int distanciaChebyshev = max(abs(st.sonambulo.f - final.f), abs(st.sonambulo.c - final.c));
-	// Distancia de Manhattan desde el jugador hasta el sonámbulo
-	// int distanciaManhattan = abs(st.jugador.f - st.sonambulo.f) + abs(st.jugador.c - st.sonambulo.c);
-	return distanciaChebyshev; //+ distanciaManhattan;
+	// Distancia de Manhattan desde el jugador hasta el área de visión del sonámbulo
+	// int distanciaManhattan = abs(st.jugador.f - st.sonambulo.f) + abs(st.jugador.c - st.sonambulo.c) - 6;
+	return distanciaChebyshev ;//+ distanciaManhattan;
 }
 
 list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
@@ -897,6 +897,21 @@ void dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, ve
 	}
 }
 
+// Función para contar casillas que no sean de un tipo en el vector
+int contarCasillas(const vector<vector<unsigned char>> &matriz, unsigned char casilla)
+{
+	int cont = 0;
+	for (int i = 0; i < matriz.size(); i++)
+	{
+		for (int j = 0; j < matriz[0].size(); j++)
+		{
+			if (matriz[i][j] != casilla)
+				cont++;
+		}
+	}
+	return cont;
+}
+
 // Este es el método principal que se piden en la practica.
 // Tiene como entrada la información de los sensores y devuelve la acción a realizar.
 // Para ver los distintos sensores mirar fichero "comportamiento.hpp"
@@ -1048,6 +1063,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 
 		// Si no tenemos plan o hemos hecho reset, lo generamos
 		if (!hayPlan and !whereIs){
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			hayPlan = true ;
 		}
@@ -1061,6 +1077,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 
 		// Si hay una colisión con una pared tenemos que recalcular el plan
 		else if (sensores.colision and sensores.terreno[2] == 'M'){
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			hayPlan = true;
 		}
@@ -1075,6 +1092,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		}
 		// Si tenemos un precipicio delante, tenemos que recalcular el plan
 		else if (sensores.terreno[2] == 'P'){
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			hayPlan = true;
 		}

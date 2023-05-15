@@ -203,6 +203,7 @@ private:
   Action last_action ;
   ubicacion goal;
   int costeDesconocida = 1 ;
+  int factorDeAumento = 6;
   bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
   stateN0 apply(const Action &accion, const stateN0 &state, const vector<vector<unsigned char>> &mapa);
   nodeN1 apply(const Action &accion, const nodeN1 &node, const vector<vector<unsigned char>> &mapa);
