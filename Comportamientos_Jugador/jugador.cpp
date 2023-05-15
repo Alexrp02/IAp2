@@ -167,6 +167,9 @@ nodeN1 ComportamientoJugador::apply(const Action &accion, const nodeN1 &node, co
 		case 'T':
 			coste = 2;
 			break;
+		case '?':
+			coste = costeDesconocida;
+			break;
 		default:
 			coste = 1;
 			break;
@@ -187,6 +190,9 @@ nodeN1 ComportamientoJugador::apply(const Action &accion, const nodeN1 &node, co
 			break;
 		case 'T':
 			coste = 2;
+			break;
+		case '?':
+			coste = costeDesconocida;
 			break;
 		default:
 			coste = 1;
@@ -249,6 +255,9 @@ nodeN1 ComportamientoJugador::apply(const Action &accion, const nodeN1 &node, co
 		case 'T':
 			coste = 1;
 			break;
+		case '?':
+			coste = costeDesconocida;
+			break;
 		default:
 			coste = 1;
 			break;
@@ -269,6 +278,9 @@ nodeN1 ComportamientoJugador::apply(const Action &accion, const nodeN1 &node, co
 			break;
 		case 'T':
 			coste = 1;
+			break;
+		case '?':
+			coste = costeDesconocida;
 			break;
 		default:
 			coste = 1;
