@@ -206,7 +206,7 @@ private:
   bool bateriaVista = false; 
   bool needRecarga = false ;
   int costeDesconocida = 1 ;
-  int factorDeAumento = 3;
+  int factorDeAumento = 4;
   void dibujarRecto(const vector<unsigned char> &terreno, const ubicacion &st, vector<vector<unsigned char>> &matriz, int factor, bool sumaColumna);
   void dibujarEnMatriz(const vector<unsigned char> &terreno, const stateN1 &st, vector<vector<unsigned char>> &matriz);
   bool casillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);

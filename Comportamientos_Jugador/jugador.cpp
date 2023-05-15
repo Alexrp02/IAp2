@@ -625,7 +625,8 @@ int heuristic(stateN1 st, ubicacion final)
 	int distanciaChebyshev = max(abs(st.sonambulo.f - final.f), abs(st.sonambulo.c - final.c));
 	// Distancia de Manhattan desde el jugador hasta el área de visión del sonámbulo
 	// int distanciaManhattan = abs(st.jugador.f - st.sonambulo.f) + abs(st.jugador.c - st.sonambulo.c) - 6;
-	return distanciaChebyshev; //+ distanciaManhattan;
+	// int distanciaManhattan2 = abs(st.jugador.f - final.f) + abs(st.jugador.c - final.c) - 7;
+	return distanciaChebyshev ;//+ distanciaManhattan + distanciaManhattan2;
 }
 
 list<Action> ComportamientoJugador::A_star(const stateN1 &inicio, const ubicacion &final, const vector<vector<unsigned char>> &mapa)
@@ -1239,7 +1240,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// Si no tenemos plan o hemos hecho reset, lo generamos
 		else if (!hayPlan and !whereIs)
 		{
-			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
@@ -1260,7 +1261,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// Si hay una colisión con una pared tenemos que recalcular el plan
 		else if (sensores.colision and sensores.terreno[2] == 'M')
 		{
-			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
@@ -1281,7 +1282,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 		// Si tenemos un precipicio delante, tenemos que recalcular el plan
 		else if (sensores.terreno[2] == 'P')
 		{
-			// costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
+			costeDesconocida = (contarCasillas(mapaResultado, '?') * factorDeAumento / (mapaResultado.size() * mapaResultado[0].size()));
 			plan = A_star(c_state1, goal, mapaResultado);
 			// Si no hay plan para el sonámbulo, lo hacemos para el jugador
 			if (plan.size() == 0)
@@ -1304,12 +1305,12 @@ Action ComportamientoJugador::think(Sensores sensores)
 			VisualizaPlan(c_state1, plan);
 		}
 		// Si estamos en la casilla de batería y tenemos poca batería, recargamos
-		if (sensores.terreno[0] == 'X' and sensores.bateria < 3000)
+		if (sensores.terreno[0] == 'X' and sensores.bateria < 1500)
 		{
 			accion = actIDLE;
 			needRecarga = true;
 		}
-		else if (sensores.bateria == 3000)
+		if (sensores.bateria == 3000)
 			needRecarga = false;
 	}
 
