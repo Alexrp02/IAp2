@@ -331,7 +331,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 {
 	nodeN0 current_node;
 	list<nodeN0> abiertos;
-	set<nodeN0> cerrados;
+	set<stateN0> cerrados;
 	list<Action> plan;
 	current_node.st = inicio;
 	bool SolutionFound = (current_node.st.jugador.f == final.f and current_node.st.jugador.c == final.c);
@@ -341,7 +341,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 	{
 		// Quitamos el nodo que está siendo evaluado de abiertos y lo metemos en cerrados
 		abiertos.pop_front();
-		cerrados.insert(current_node);
+		cerrados.insert(current_node.st);
 
 		// Estados generados para el jugador
 		// Generar hijo actFORWARD
@@ -355,7 +355,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 			SolutionFound = true;
 		}
 		// Si el hijo generado no está en cerrados, entonces se añade a abiertos
-		else if (cerrados.find(childForward) == cerrados.end())
+		else if (cerrados.find(childForward.st) == cerrados.end())
 		{
 			childForward.secuencia.push_back(actFORWARD);
 			abiertos.push_back(childForward);
@@ -366,7 +366,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 			// Generar hijo actTURN_L
 			nodeN0 childTurnL = current_node;
 			childTurnL.st = apply(actTURN_L, current_node.st, mapa);
-			if (cerrados.find(childTurnL) == cerrados.end())
+			if (cerrados.find(childTurnL.st) == cerrados.end())
 			{
 				childTurnL.secuencia.push_back(actTURN_L);
 				abiertos.push_back(childTurnL);
@@ -375,7 +375,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 			// Generar hijo actTURN_R
 			nodeN0 childTurnR = current_node;
 			childTurnR.st = apply(actTURN_R, current_node.st, mapa);
-			if (cerrados.find(childTurnR) == cerrados.end())
+			if (cerrados.find(childTurnR.st) == cerrados.end())
 			{
 				childTurnR.secuencia.push_back(actTURN_R);
 				abiertos.push_back(childTurnR);
@@ -385,7 +385,7 @@ list<Action> AnchuraSoloJugador(const stateN0 &inicio, const ubicacion &final, c
 		if (!SolutionFound and !abiertos.empty())
 		{
 			current_node = abiertos.front();
-			while (!abiertos.empty() and cerrados.find(current_node) != cerrados.end())
+			while (!abiertos.empty() and cerrados.find(current_node.st) != cerrados.end())
 			{
 				abiertos.pop_front();
 				if (!abiertos.empty())
@@ -403,7 +403,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 {
 	nodeN0 current_node;
 	queue<nodeN0> abiertos;
-	set<nodeN0> cerrados;
+	set<stateN0> cerrados;
 	list<Action> plan;
 	current_node.st = inicio;
 	bool SolutionFound = (current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c);
@@ -414,7 +414,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 		// Quitamos el nodo que está siendo evaluado de abiertos y lo metemos en cerrados
 		// current_node = abiertos.front();
 		abiertos.pop();
-		cerrados.insert(current_node);
+		cerrados.insert(current_node.st);
 
 		// Estados generados para el sonámbulo si está en visión.
 		if (sonambuloEnVision(current_node.st))
@@ -430,7 +430,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 				SolutionFound = true;
 				break;
 			}
-			else if (cerrados.find(childSonForward) == cerrados.end())
+			else if (cerrados.find(childSonForward.st) == cerrados.end())
 			{
 				childSonForward.secuencia.push_back(actSON_FORWARD);
 				abiertos.push(childSonForward);
@@ -441,7 +441,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 				// Generar hijo actTURN_L
 				nodeN0 childSonTurnL = current_node;
 				childSonTurnL.st = apply(actSON_TURN_SL, current_node.st, mapa);
-				if (cerrados.find(childSonTurnL) == cerrados.end())
+				if (cerrados.find(childSonTurnL.st) == cerrados.end())
 				{
 					childSonTurnL.secuencia.push_back(actSON_TURN_SL);
 					abiertos.push(childSonTurnL);
@@ -450,14 +450,13 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 				// Generar hijo actTURN_R
 				nodeN0 childSonTurnR = current_node;
 				childSonTurnR.st = apply(actSON_TURN_SR, current_node.st, mapa);
-				if (cerrados.find(childSonTurnR) == cerrados.end())
+				if (cerrados.find(childSonTurnR.st) == cerrados.end())
 				{
 					childSonTurnR.secuencia.push_back(actSON_TURN_SR);
 					abiertos.push(childSonTurnR);
 				}
 			}
 		}
-		else
 
 			if (!SolutionFound)
 		{
@@ -467,7 +466,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 			childForward.st = apply(actFORWARD, current_node.st, mapa);
 
 			// Si el hijo generado no está en cerrados, entonces se añade a abiertos
-			if (cerrados.find(childForward) == cerrados.end())
+			if (cerrados.find(childForward.st) == cerrados.end())
 			{
 				childForward.secuencia.push_back(actFORWARD);
 				abiertos.push(childForward);
@@ -475,7 +474,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 			// Generar hijo actTURN_L
 			nodeN0 childTurnL = current_node;
 			childTurnL.st = apply(actTURN_L, current_node.st, mapa);
-			if (cerrados.find(childTurnL) == cerrados.end())
+			if (cerrados.find(childTurnL.st) == cerrados.end())
 			{
 				childTurnL.secuencia.push_back(actTURN_L);
 				abiertos.push(childTurnL);
@@ -484,7 +483,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 			// Generar hijo actTURN_R
 			nodeN0 childTurnR = current_node;
 			childTurnR.st = apply(actTURN_R, current_node.st, mapa);
-			if (cerrados.find(childTurnR) == cerrados.end())
+			if (cerrados.find(childTurnR.st) == cerrados.end())
 			{
 				childTurnR.secuencia.push_back(actTURN_R);
 				abiertos.push(childTurnR);
@@ -494,7 +493,7 @@ list<Action> AnchuraJugadorSonambulo(const stateN0 &inicio, const ubicacion &fin
 		if (!SolutionFound and !abiertos.empty())
 		{
 			current_node = abiertos.front();
-			while (!abiertos.empty() and cerrados.find(current_node) != cerrados.end())
+			while (!abiertos.empty() and cerrados.find(current_node.st) != cerrados.end())
 			{
 				abiertos.pop();
 				if (!abiertos.empty())
